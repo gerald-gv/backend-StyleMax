@@ -3,7 +3,9 @@ package com.stylemax.stylemax_api.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -39,4 +41,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 	List<Producto> buscarCatalogo(@Param("categoriaId") Long categoriaId,
 			@Param("marcaId") Long marcaId,
 			@Param("q") String q);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT p FROM Producto p WHERE p.id =:id")
+	Optional<Producto> buscarConLockParaActualizarStock(@Param("id") Long id);
 }

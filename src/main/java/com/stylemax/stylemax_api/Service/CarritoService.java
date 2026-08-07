@@ -138,4 +138,12 @@ public class CarritoService {
         carritoRepository.save(carrito);
         return CarritoDTO.fromEntity(carrito);
     }
+
+    @Transactional
+    public void vaciarCarrito(Carrito carrito) {
+        carrito.getItems().clear();
+        carrito.setTotal(BigDecimal.ZERO);
+        carrito.setFechaActualizacion(LocalDateTime.now());
+        carritoRepository.save(carrito);
+    }
 }
