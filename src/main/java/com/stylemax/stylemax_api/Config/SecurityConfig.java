@@ -31,9 +31,9 @@ public class SecurityConfig {
                             // al usuario, asi que este endpoint queda abierto solo para
                             // probar el flujo de carrito con Postman. Mientras esto siga
                             // asi, usuarioId viaja SIN VALIDAR en cada request -- cualquiera
-                            // puede leer u operar el carrito de otro usuario con solo
+                            // puede leer u operar el carrito o los pedidos de otro usuario con solo
                             // cambiar el numero. Sacar este permitAll en cuanto exista JWT.
-                            .requestMatchers("/api/carrito/**")
+                            .requestMatchers("/api/carrito/**", "/api/pedidos/**")
                             .permitAll()
                     // Lo demas (pedidos, usuarios) queda protegido con JWT mas adelante
                     .anyRequest().authenticated()
