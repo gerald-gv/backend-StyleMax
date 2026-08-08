@@ -75,4 +75,11 @@ public class PedidoService {
         return pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el pedido: " + pedidoId));
     }
+
+    @Transactional
+    public void guardarPreferencia(Long pedidoId, String preferenceId) {
+        Pedido pedido = obtenerPorId(pedidoId);
+        pedido.setMercadoPagoPreferenceId(preferenceId);
+        pedidoRepository.save(pedido);
+    }
 }
