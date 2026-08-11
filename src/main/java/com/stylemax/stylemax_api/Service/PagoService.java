@@ -1,5 +1,6 @@
 package com.stylemax.stylemax_api.Service;
 
+import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest; // URLs de retorno (success/pending/failure).
 import com.mercadopago.client.preference.PreferenceClient; // Es el objeto que hace la llamada a la API de Mercado Pago
 import com.mercadopago.client.preference.PreferenceItemRequest; // Item individual de la preferencia (un producto)
@@ -9,10 +10,12 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 
 //Se usa como tipo de retorno | Contiene la preferencia ya creada (id, link de pago (init point))
+import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 
 import com.stylemax.stylemax_api.Entity.DetallePedido;
 import com.stylemax.stylemax_api.Entity.Pedido;
+import com.stylemax.stylemax_api.Enums.PedidoEstado;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +41,12 @@ public class PagoService {
     // La preferencia de pago se crea a partir ded un Pedido existente en la bd
     public Preference crearPreferencia(Pedido pedido) {
         try {
+
+            if (pedido.getEstado() != PedidoEstado.PENDIENTE) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "El pedido " + pedido.getId() + " no esta pendiente de pago (estado actual: "
+                                + pedido.getEstado() + ")");
+            }
             List<PreferenceItemRequest> items = pedido.getDetalles().stream()
                     .map(this::toPreferenceItem)
                     .toList();
@@ -84,5 +93,27 @@ public class PagoService {
                 .unitPrice(detalle.getPrecioUnitario())
                 .currencyId("PEN")
                 .build();
+    }
+
+    public void procesarNotificacion(String tipo, String paymentId) {
+        if (!"payment".equals(tipo) || paymentId == null || paymentId.isBlank()) {
+            return;
+        }
+
+        try {
+            Payment payment = new PaymentClient().get(Long.parseLong(paymentId));
+            Long pedidoId = Long.parseLong(payment.getExternalReference());
+            String status = payment.getStatus();
+
+            switch (status) {
+                case "approved" -> pedidoService.marcarComoPagado(pedidoId, paymentId);
+                case "reject", "cancelled" -> pedidoService.marcarComoCancelado(pedidoId, paymentId);
+                default -> log.info("Pago {} en estado '{}' para pedido {}, sin accion todavia",
+                        paymentId, status, pedidoId);
+            }
+        } catch (MPException | MPApiException e) {
+            log.error("Error consultando el pago {} en Mercado Pago", paymentId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo verificar el pago");
+        }
     }
 }
