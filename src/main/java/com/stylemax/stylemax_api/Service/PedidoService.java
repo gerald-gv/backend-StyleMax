@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -115,5 +116,15 @@ public class PedidoService {
             productoRepository.save(producto);
         }
         pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void cancelarPedidosExpirados(int minutosExpiracion) {
+        LocalDateTime limite = LocalDateTime.now().minusMinutes(minutosExpiracion);
+        List<Pedido> vencidos = pedidoRepository.findByEstadoAndFechaPedidoBefore(PedidoEstado.PENDIENTE, limite);
+
+        for (Pedido pedido : vencidos) {
+            marcarComoCancelado(pedido.getId(), null);
+        }
     }
 }
