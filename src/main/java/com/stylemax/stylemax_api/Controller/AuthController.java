@@ -2,6 +2,7 @@ package com.stylemax.stylemax_api.Controller;
 
 import com.stylemax.stylemax_api.DTO.LoginRequest;
 import com.stylemax.stylemax_api.DTO.LoginResponseDTO;
+import com.stylemax.stylemax_api.DTO.RegisterRequest;
 import com.stylemax.stylemax_api.Service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +20,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponseDTO login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request.correo(), request.password());
+    }
+
+    @PostMapping("/register")
+    public LoginResponseDTO register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request);
     }
 }
