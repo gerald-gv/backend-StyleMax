@@ -1,10 +1,15 @@
 package com.stylemax.stylemax_api.Config;
 
+import com.stylemax.stylemax_api.Security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
@@ -14,30 +19,32 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                // Catalogo publico: cualquiera puede consultar productos, categorias y marcas
-                .requestMatchers(HttpMethod.GET,
-                        "/api/productos/**",
-                        "/api/categorias/**",
-                        "/api/marcas/**")
-                    .permitAll()
-                    // TODO(seguridad) TEMPORAL: sin JWT no hay forma de autenticar
-                            // al usuario, asi que este endpoint queda abierto solo para
-                            // probar el flujo de carrito con Postman. Mientras esto siga
-                            // asi, usuarioId viaja SIN VALIDAR en cada request -- cualquiera
-                            // puede leer u operar el carrito o los pedidos de otro usuario con solo
-                            // cambiar el numero. Sacar este permitAll en cuanto exista JWT.
-                            .requestMatchers("/api/carrito/**", "/api/pedidos/**")
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/productos/**",
+                                "/api/categorias/**",
+                                "/api/marcas/**")
                             .permitAll()
-                    // Lo demas (pedidos, usuarios) queda protegido con JWT mas adelante
-                    .anyRequest().authenticated()
-            );
+                        .requestMatchers("/api/auth/**")
+                            .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/pagos/webhook")
+                            .permitAll()
+                        .anyRequest().authenticated()
+                )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

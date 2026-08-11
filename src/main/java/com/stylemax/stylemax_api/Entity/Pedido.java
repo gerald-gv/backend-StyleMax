@@ -50,6 +50,12 @@ public class Pedido {
     @Column(nullable = false, length = 20)
     private PedidoEstado estado;
 
+    @Column(name = "mercado_pago_preference_id", length = 100)
+    private String mercadoPagoPreferenceId;
+
+    @Column(name = "mercado_pago_payment_id", length = 100)
+    private String mercadoPagoPaymentId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

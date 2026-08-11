@@ -1,6 +1,10 @@
 package com.stylemax.stylemax_api.Service;
 
-import com.stylemax.stylemax_api.Entity.*;
+import com.stylemax.stylemax_api.Entity.Carrito;
+import com.stylemax.stylemax_api.Entity.CarritoItem;
+import com.stylemax.stylemax_api.Entity.DetallePedido;
+import com.stylemax.stylemax_api.Entity.Pedido;
+import com.stylemax.stylemax_api.Entity.Producto;
 import com.stylemax.stylemax_api.Enums.PedidoEstado;
 import com.stylemax.stylemax_api.Repository.PedidoRepository;
 import com.stylemax.stylemax_api.Repository.ProductoRepository;
@@ -12,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,5 +79,52 @@ public class PedidoService {
     public Pedido obtenerPorId(Long pedidoId) {
         return pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el pedido: " + pedidoId));
+    }
+
+    @Transactional
+    public Pedido obtenerPorIdYUsuario(Long pedidoId, Long usuarioId) {
+        Pedido pedido = obtenerPorId(pedidoId);
+        if (!pedido.getUsuario().getId().equals(usuarioId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido no encontrado: " + pedidoId);
+        }
+        return pedido;
+    }
+    @Transactional
+    public void guardarPreferencia(Long pedidoId, String preferenceId) {
+        Pedido pedido = obtenerPorId(pedidoId);
+        pedido.setMercadoPagoPreferenceId(preferenceId);
+        pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void marcarComoPagado(Long pedidoId, String paymentId) {
+        Pedido pedido = obtenerPorId(pedidoId);
+        pedido.setEstado(PedidoEstado.PAGADO);
+        pedido.setMercadoPagoPaymentId(paymentId);
+        pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void marcarComoCancelado(Long pedidoId, String paymentId) {
+        Pedido pedido = obtenerPorId(pedidoId);
+        pedido.setEstado(PedidoEstado.CANCELADO);
+        pedido.setMercadoPagoPaymentId(paymentId);
+
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
+        }
+        pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void cancelarPedidosExpirados(int minutosExpiracion) {
+        LocalDateTime limite = LocalDateTime.now().minusMinutes(minutosExpiracion);
+        List<Pedido> vencidos = pedidoRepository.findByEstadoAndFechaPedidoBefore(PedidoEstado.PENDIENTE, limite);
+
+        for (Pedido pedido : vencidos) {
+            marcarComoCancelado(pedido.getId(), null);
+        }
     }
 }
