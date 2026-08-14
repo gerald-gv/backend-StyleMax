@@ -49,7 +49,23 @@ public class Pedido {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PedidoEstado estado;
+    
+    @Column(nullable = false, length = 100)
+    private String departamento;
 
+    @Column(nullable = false, length = 100)
+    private String provincia;
+
+    @Column(nullable = false, length = 100)
+    private String distrito;
+
+    @Column(nullable = false, length = 200)
+    private String direccionCompleta;
+
+    @Column(length = 200)
+    private String referencia;
+    
+    
     @Column(name = "mercado_pago_preference_id", length = 100)
     private String mercadoPagoPreferenceId;
 

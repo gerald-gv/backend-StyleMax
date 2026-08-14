@@ -3,9 +3,11 @@ package com.stylemax.stylemax_api.Service;
 import com.stylemax.stylemax_api.Entity.Carrito;
 import com.stylemax.stylemax_api.Entity.CarritoItem;
 import com.stylemax.stylemax_api.Entity.DetallePedido;
+import com.stylemax.stylemax_api.Entity.Direccion;
 import com.stylemax.stylemax_api.Entity.Pedido;
 import com.stylemax.stylemax_api.Entity.Producto;
 import com.stylemax.stylemax_api.Enums.PedidoEstado;
+import com.stylemax.stylemax_api.Repository.DireccionRepository;
 import com.stylemax.stylemax_api.Repository.PedidoRepository;
 import com.stylemax.stylemax_api.Repository.ProductoRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +26,7 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
     private final CarritoService  carritoService;
+    private final DireccionRepository direccionRepository;
 
     @Transactional
     public Pedido crearPedidoDesdeCarrito(Long usuarioId) {
@@ -32,13 +35,29 @@ public class PedidoService {
         if (carrito.getItems().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El carrito es vacío");
         }
-
+        
+        Direccion direccion = direccionRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.BAD_REQUEST,"Debes registrar una dirección antes de realizar la compra")
+                );
+        
+        
         Pedido pedido = Pedido.builder()
                 .usuario(carrito.getUsuario())
                 .fechaPedido(LocalDateTime.now())
                 .estado(PedidoEstado.PENDIENTE)
                 .total(carrito.getTotal())
+                
+                // Copiamos la dirección actual
+                .departamento(direccion.getDepartamento())
+                .provincia(direccion.getProvincia())
+                .distrito(direccion.getDistrito())
+                .direccionCompleta(direccion.getDireccionCompleta())
+                .referencia(direccion.getReferencia())
+                
                 .build();
+        
+        
 
         // Orden fijo por producto id para evitar un dead lock
         carrito.getItems().stream()

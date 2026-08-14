@@ -47,6 +47,8 @@ public class PagoService {
                         "El pedido " + pedido.getId() + " no esta pendiente de pago (estado actual: "
                                 + pedido.getEstado() + ")");
             }
+            validarDireccion(pedido);
+            
             List<PreferenceItemRequest> items = pedido.getDetalles().stream()
                     .map(this::toPreferenceItem)
                     .toList();
@@ -114,6 +116,21 @@ public class PagoService {
         } catch (MPException | MPApiException e) {
             log.error("Error consultando el pago {} en Mercado Pago", paymentId, e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo verificar el pago");
+        }
+    }
+    
+    private void validarDireccion(Pedido pedido) {
+
+        if (pedido.getDepartamento() == null
+                || pedido.getDepartamento().isBlank()
+                || pedido.getProvincia() == null
+                || pedido.getProvincia().isBlank()
+                || pedido.getDistrito() == null
+                || pedido.getDistrito().isBlank()
+                || pedido.getDireccionCompleta() == null
+                || pedido.getDireccionCompleta().isBlank()) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"El pedido no tiene una dirección de entrega válida");
         }
     }
 }

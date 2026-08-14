@@ -16,6 +16,11 @@ public class PedidoDTO {
     private LocalDateTime fechaPedido;
     private BigDecimal total;
     private PedidoEstado estado;
+    private String departamento;
+    private String provincia;
+    private String distrito;
+    private String direccionCompleta;
+    private String referencia;
     private List<DetallePedidoDTO> detalles;
 
     public static PedidoDTO fromEntity(Pedido pedido) {
@@ -24,6 +29,11 @@ public class PedidoDTO {
                 .fechaPedido(pedido.getFechaPedido())
                 .total(pedido.getTotal())
                 .estado(pedido.getEstado())
+                .departamento(pedido.getDepartamento())
+                .provincia(pedido.getProvincia())
+                .distrito(pedido.getDistrito())
+                .direccionCompleta(pedido.getDireccionCompleta())
+                .referencia(pedido.getReferencia())
                 .detalles(pedido.getDetalles().stream().map(DetallePedidoDTO::fromEntity).toList())
                 .build();
     }
