@@ -38,11 +38,33 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 			AND (:q IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%')))
 			ORDER BY p.nombre ASC
 			""")
-	List<Producto> buscarCatalogo(@Param("categoriaId") Long categoriaId,
-			@Param("marcaId") Long marcaId,
-			@Param("q") String q);
+	List<Producto> buscarCatalogo(@Param("categoriaId") Long categoriaId, @Param("marcaId") Long marcaId, @Param("q") String q);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT p FROM Producto p WHERE p.id =:id")
 	Optional<Producto> buscarConLockParaActualizarStock(@Param("id") Long id);
+	
+	// ADMIN
+	
+	@Query("""
+            SELECT p
+            FROM Producto p
+            JOIN FETCH p.marca
+            JOIN FETCH p.categoria
+            ORDER BY p.id DESC
+            """)
+    List<Producto> findAllParaAdmin();
+	
+	
+	@Query("""
+            SELECT p
+            FROM Producto p
+            JOIN FETCH p.marca
+            JOIN FETCH p.categoria
+            WHERE p.id = :id
+            """)
+    Optional<Producto> findByIdParaAdmin(@Param("id") Long id);
+	
+	boolean existsBySlug(String slug);
+
 }
