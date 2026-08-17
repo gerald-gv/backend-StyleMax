@@ -4,10 +4,14 @@ import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.stylemax.stylemax_api.DTO.PaginaDTO;
 import com.stylemax.stylemax_api.DTO.ProductoCardDTO;
 import com.stylemax.stylemax_api.DTO.ProductoDetalleDTO;
 import com.stylemax.stylemax_api.DTO.admin.ActualizarProductoRequest;
@@ -25,18 +29,34 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductoService {
-
+	
+	private static final int TAMANIO_PAGINA = 16;
+	
     private final ProductoRepository productoRepository;
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
 
     //Catalogo principal
-    public List<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, String q) {
+    public PaginaDTO<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, String q, int pagina) {
         String query = (q == null || q.isBlank()) ? null : q.trim();
-        return productoRepository.buscarCatalogo(categoriaId, marcaId, query)
-                .stream()
-                .map(ProductoCardDTO::fromEntity)
-                .toList();
+        
+        Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA);
+        
+        Page<Producto> productos = productoRepository.buscarCatalogo(categoriaId, marcaId, query, pageable);
+        
+        return PaginaDTO.<ProductoCardDTO>builder()
+                .contenido(
+                        productos.getContent()
+                                .stream()
+                                .map(ProductoCardDTO::fromEntity)
+                                .toList()
+                )
+                .pagina(productos.getNumber())
+                .tamanio(productos.getSize())
+                .totalElementos(productos.getTotalElements())
+                .totalPaginas(productos.getTotalPages())
+                .ultima(productos.isLast())
+                .build();
     }
     
     // Detalle de producto para la ruta dinamica
