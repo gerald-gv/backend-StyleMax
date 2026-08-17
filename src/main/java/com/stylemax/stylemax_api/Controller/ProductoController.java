@@ -1,6 +1,5 @@
 package com.stylemax.stylemax_api.Controller;
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.stylemax.stylemax_api.DTO.PaginaDTO;
 import com.stylemax.stylemax_api.DTO.ProductoCardDTO;
 import com.stylemax.stylemax_api.DTO.ProductoDetalleDTO;
+import com.stylemax.stylemax_api.Enums.Fit;
 import com.stylemax.stylemax_api.Service.ProductoService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,7 @@ public class ProductoController {
     public PaginaDTO<ProductoCardDTO> listarCatalogo(
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long marcaId,
+            @RequestParam(required = false) Fit fit,
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page) {
     	
@@ -35,7 +36,7 @@ public class ProductoController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La página no puede ser negativa");
         }
     	
-        return productoService.listarCatalogo(categoriaId, marcaId, q, page);
+        return productoService.listarCatalogo(categoriaId, marcaId, fit, q, page);
     }
 
     //ruta dinamica, pagina de detalle.

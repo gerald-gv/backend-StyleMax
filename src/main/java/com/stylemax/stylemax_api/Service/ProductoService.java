@@ -20,6 +20,7 @@ import com.stylemax.stylemax_api.DTO.admin.ProductoAdminDTO;
 import com.stylemax.stylemax_api.Entity.Categoria;
 import com.stylemax.stylemax_api.Entity.Marca;
 import com.stylemax.stylemax_api.Entity.Producto;
+import com.stylemax.stylemax_api.Enums.Fit;
 import com.stylemax.stylemax_api.Repository.CategoriaRepository;
 import com.stylemax.stylemax_api.Repository.MarcaRepository;
 import com.stylemax.stylemax_api.Repository.ProductoRepository;
@@ -37,12 +38,12 @@ public class ProductoService {
     private final CategoriaRepository categoriaRepository;
 
     //Catalogo principal
-    public PaginaDTO<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, String q, int pagina) {
+    public PaginaDTO<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, Fit fit, String q, int pagina) {
         String query = (q == null || q.isBlank()) ? null : q.trim();
         
         Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA);
         
-        Page<Producto> productos = productoRepository.buscarCatalogo(categoriaId, marcaId, query, pageable);
+        Page<Producto> productos = productoRepository.buscarCatalogo(categoriaId, marcaId,fit, query, pageable);
         
         return PaginaDTO.<ProductoCardDTO>builder()
                 .contenido(
