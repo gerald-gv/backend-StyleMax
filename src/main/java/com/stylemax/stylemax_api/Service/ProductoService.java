@@ -63,8 +63,7 @@ public class ProductoService {
     
     // Detalle de producto para la ruta dinamica
     public ProductoDetalleDTO obtenerPorSlug(String slug) {
-        Producto producto = productoRepository.findBySlug(slug)
-                .filter(Producto::getActivo)
+        Producto producto = productoRepository.findBySlugParaCatalogo(slug)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Producto no encontrado: " + slug));
         return ProductoDetalleDTO.fromEntity(producto);

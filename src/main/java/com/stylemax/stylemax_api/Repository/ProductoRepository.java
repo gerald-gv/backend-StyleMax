@@ -20,7 +20,15 @@ import com.stylemax.stylemax_api.Enums.Fit;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 	
-	Optional<Producto> findBySlug(String slug);
+	@Query("""
+		    SELECT p
+		    FROM Producto p
+		    JOIN p.categoria c
+		    WHERE p.slug = :slug
+		      AND p.activo = true
+		      AND c.activo = true
+		""")
+	Optional<Producto> findBySlugParaCatalogo(String slug);
 	
 	List<Producto> findByActivoTrue();
 	
@@ -36,8 +44,10 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
 	
 	@Query("""
-			SELECT p FROM Producto p
+			SELECT p FROM Producto  p 
 			WHERE p.activo = true
+			AND p.marca.activo = true
+			AND p.categoria.activo = true
 			AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
 			AND (:marcaId IS NULL OR p.marca.id = :marcaId)
 			AND (:fit IS NULL OR p.fit = :fit)
