@@ -128,7 +128,7 @@ public class ProductoService {
                 .fit(request.fit())
                 .imagen(request.imagen())
                 .destacado( request.destacado() != null ? request.destacado() : false)
-                .activo(true)
+                .activo(request.stock() > 0)
                 .marca(marca)
                 .categoria(categoria)
                 .build();
@@ -161,7 +161,8 @@ public class ProductoService {
         producto.setImagen(request.imagen());
 
         producto.setDestacado( request.destacado() != null? request.destacado(): false);
-        producto.setActivo( request.activo() != null ? request.activo() : false);
+        
+        producto.setActivo(request.stock() > 0);
 
         producto.setMarca(marca);
         producto.setCategoria(categoria);
