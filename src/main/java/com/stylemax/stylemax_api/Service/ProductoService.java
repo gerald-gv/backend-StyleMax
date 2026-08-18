@@ -161,8 +161,10 @@ public class ProductoService {
         producto.setImagen(request.imagen());
 
         producto.setDestacado( request.destacado() != null? request.destacado(): false);
-        
-        producto.setActivo(request.stock() > 0);
+        if (request.stock() <= 0) {
+            producto.setActivo(false);
+        }
+        producto.setActivo( request.activo() != null ? request.activo() : false);
 
         producto.setMarca(marca);
         producto.setCategoria(categoria);
