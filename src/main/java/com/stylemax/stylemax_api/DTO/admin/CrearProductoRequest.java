@@ -39,6 +39,8 @@ public record CrearProductoRequest(
 	    String imagen,
 
 	    Boolean destacado,
+	    
+	    Boolean activo,
 
 	    @NotNull
 	    Long marcaId,

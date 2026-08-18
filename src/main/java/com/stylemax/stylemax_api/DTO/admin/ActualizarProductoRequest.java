@@ -17,6 +17,7 @@ public record ActualizarProductoRequest(
 	    String nombre,
 
 	    @NotBlank
+	    @Size(max = 2000)
 	    String descripcion,
 
 	    @NotNull
@@ -38,6 +39,8 @@ public record ActualizarProductoRequest(
 	    String imagen,
 
 	    Boolean destacado,
+	    
+	    Boolean activo,
 
 	    @NotNull
 	    Long marcaId,

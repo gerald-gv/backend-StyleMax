@@ -1,7 +1,6 @@
 package com.stylemax.stylemax_api.Service;
 
 import java.text.Normalizer;
-import java.util.List;
 import java.util.Locale;
 
 import org.springframework.data.domain.Page;
@@ -17,6 +16,7 @@ import com.stylemax.stylemax_api.DTO.ProductoDetalleDTO;
 import com.stylemax.stylemax_api.DTO.admin.ActualizarProductoRequest;
 import com.stylemax.stylemax_api.DTO.admin.CrearProductoRequest;
 import com.stylemax.stylemax_api.DTO.admin.ProductoAdminDTO;
+import com.stylemax.stylemax_api.DTO.admin.ProductoEstadisticasDTO;
 import com.stylemax.stylemax_api.Entity.Categoria;
 import com.stylemax.stylemax_api.Entity.Marca;
 import com.stylemax.stylemax_api.Entity.Producto;
@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductoService {
 	
 	private static final int TAMANIO_PAGINA = 16;
+	private static final int TAMANIO_PAGINA_ADMIN = 16;
 	
     private final ProductoRepository productoRepository;
     private final MarcaRepository marcaRepository;
@@ -71,13 +72,27 @@ public class ProductoService {
     
     // ADMIN
     
-    public List<ProductoAdminDTO> listarTodosParaAdmin() {
+    public PaginaDTO<ProductoAdminDTO> listarParaAdmin( String q, int pagina) {
 
-        return productoRepository
-                .findAllParaAdmin()
-                .stream()
-                .map(this::toAdminDTO)
-                .toList();
+        String query = (q == null || q.isBlank()) ? null : q.trim();
+
+        Pageable pageable = PageRequest.of( pagina, TAMANIO_PAGINA_ADMIN );
+
+        Page<Producto> productos = productoRepository.buscarParaAdmin(query,pageable);
+
+        return PaginaDTO.<ProductoAdminDTO>builder()
+                .contenido(
+                        productos.getContent()
+                                .stream()
+                                .map(this::toAdminDTO)
+                                .toList()
+                )
+                .pagina(productos.getNumber())
+                .tamanio(productos.getSize())
+                .totalElementos(productos.getTotalElements())
+                .totalPaginas(productos.getTotalPages())
+                .ultima(productos.isLast())
+                .build();
     }
 
 
@@ -146,6 +161,7 @@ public class ProductoService {
         producto.setImagen(request.imagen());
 
         producto.setDestacado( request.destacado() != null? request.destacado(): false);
+        producto.setActivo( request.activo() != null ? request.activo() : false);
 
         producto.setMarca(marca);
         producto.setCategoria(categoria);
@@ -167,7 +183,10 @@ public class ProductoService {
 
         return toAdminDTO(producto);
     }
-
+    
+    public ProductoEstadisticasDTO obtenerEstadisticas() {
+        return ProductoEstadisticasDTO.fromProjection(productoRepository.obtenerEstadisticasAdmin());
+    }
 
     // MAPPER
 

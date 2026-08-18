@@ -1,12 +1,11 @@
 package com.stylemax.stylemax_api.Controller;
 
-import java.util.List;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.stylemax.stylemax_api.DTO.PaginaDTO;
 import com.stylemax.stylemax_api.DTO.admin.ActualizarProductoRequest;
 import com.stylemax.stylemax_api.DTO.admin.CrearProductoRequest;
 import com.stylemax.stylemax_api.DTO.admin.ProductoAdminDTO;
+import com.stylemax.stylemax_api.DTO.admin.ProductoEstadisticasDTO;
 import com.stylemax.stylemax_api.Service.ProductoService;
 
 import jakarta.validation.Valid;
@@ -33,8 +35,18 @@ public class AdminProductoController {
     private final ProductoService productoService;
 
     @GetMapping
-    public List<ProductoAdminDTO> listarTodos() {
-        return productoService.listarTodosParaAdmin();
+    public PaginaDTO<ProductoAdminDTO> listarProductos(@RequestParam(required = false) String q, @RequestParam(defaultValue = "0") int page) {
+
+        if (page < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La página no puede ser negativa");
+        }
+
+        return productoService.listarParaAdmin(q, page);
+    }
+    
+    @GetMapping("/estadisticas")
+    public ProductoEstadisticasDTO obtenerEstadisticas() {
+        return productoService.obtenerEstadisticas();
     }
 
 
