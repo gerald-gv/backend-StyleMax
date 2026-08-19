@@ -61,7 +61,7 @@ public class PagoService {
                             .pending(frontendUrl + "/checkout/pending")
                             .failure(frontendUrl + "/checkout/failure")
                             .build())
-                    //.autoReturn("approved")
+                    .autoReturn("approved")
                     // ============================================================
                     // ATENCION: autoReturn("approved") DESACTIVADO A PROPOSITO.
                     // Mercado Pago exige que back_urls.success sea una URL PUBLICA
