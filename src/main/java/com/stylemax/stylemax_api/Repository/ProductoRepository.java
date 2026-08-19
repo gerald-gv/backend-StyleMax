@@ -24,9 +24,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 		    SELECT p
 		    FROM Producto p
 		    JOIN p.categoria c
+		    JOIN p.marca m
 		    WHERE p.slug = :slug
 		      AND p.activo = true
 		      AND c.activo = true
+		      AND m.activo = true
 		""")
 	Optional<Producto> findBySlugParaCatalogo(String slug);
 	

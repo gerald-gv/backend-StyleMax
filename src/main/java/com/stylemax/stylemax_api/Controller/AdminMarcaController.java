@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,60 +15,51 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.stylemax.stylemax_api.DTO.PaginaDTO;
-import com.stylemax.stylemax_api.DTO.admin.ActualizarCategoriaRequest;
-import com.stylemax.stylemax_api.DTO.admin.CategoriaAdminDTO;
-import com.stylemax.stylemax_api.DTO.admin.CategoriaEstadisticasDTO;
-import com.stylemax.stylemax_api.DTO.admin.CrearCategoriaRequest;
-import com.stylemax.stylemax_api.Service.CategoriaService;
+import com.stylemax.stylemax_api.DTO.admin.ActualizarMarcaRequest;
+import com.stylemax.stylemax_api.DTO.admin.CrearMarcaRequest;
+import com.stylemax.stylemax_api.DTO.admin.MarcaAdminDTO;
+import com.stylemax.stylemax_api.DTO.admin.MarcaEstadisticasDTO;
+import com.stylemax.stylemax_api.Service.MarcaService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/admin/categorias")
-@RequiredArgsConstructor
+@RequestMapping("/api/admin/marcas")
 @PreAuthorize("hasRole('ADMINISTRADOR')")
-public class AdminCategoriaController {
-	
-	private final CategoriaService categoriaService;
+@RequiredArgsConstructor
+public class AdminMarcaController {
 
+    private final MarcaService marcaService;
 
     @GetMapping
-    public PaginaDTO<CategoriaAdminDTO> listar(@RequestParam(required = false) String q, @RequestParam(defaultValue = "0") int page) {
+    public PaginaDTO<MarcaAdminDTO> listar(@RequestParam(required = false) String q, @RequestParam(defaultValue = "0") int page) {
 
         if (page < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La página no puede ser negativa");
         }
 
-        return categoriaService.listarParaAdmin(q, page);
+        return marcaService.listarParaAdmin(q, page);
     }
-
 
     @GetMapping("/estadisticas")
-    public CategoriaEstadisticasDTO obtenerEstadisticas() {
-
-        return categoriaService.obtenerEstadisticas();
+    public MarcaEstadisticasDTO obtenerEstadisticas() {
+        return marcaService.obtenerEstadisticas();
     }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoriaAdminDTO crear(@Valid @RequestBody CrearCategoriaRequest request) {
-
-        return categoriaService.crear(request);
+    public MarcaAdminDTO crear(@Valid @RequestBody CrearMarcaRequest request) {
+        return marcaService.crear(request);
     }
-
 
     @PutMapping("/{id}")
-    public CategoriaAdminDTO actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarCategoriaRequest request) {
-
-        return categoriaService.actualizar(id, request);
+    public MarcaAdminDTO actualizar(@PathVariable Long id,@Valid @RequestBody ActualizarMarcaRequest request) {
+        return marcaService.actualizar(id, request);
     }
-    
+
     @DeleteMapping("/{id}")
-    public CategoriaAdminDTO eliminar(
-            @PathVariable Long id
-    ) {
-        return categoriaService.eliminar(id);
+    public MarcaAdminDTO eliminar(@PathVariable Long id) {
+        return marcaService.eliminar(id);
     }
 }
