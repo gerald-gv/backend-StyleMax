@@ -1,6 +1,7 @@
 package com.stylemax.stylemax_api.Service;
 
 import java.text.Normalizer;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.data.domain.Page;
@@ -67,6 +68,15 @@ public class ProductoService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Producto no encontrado: " + slug));
         return ProductoDetalleDTO.fromEntity(producto);
+    }
+    
+    public List<ProductoCardDTO> listarDestacados() {
+
+        return productoRepository.listarDestacados()
+                .stream()
+                .limit(8)
+                .map(ProductoCardDTO::fromEntity)
+                .toList();
     }
     
     // ADMIN

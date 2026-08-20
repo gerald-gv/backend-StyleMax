@@ -36,7 +36,18 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 	
 	List<Producto> findByDestacadoTrue();
 	
-	List<Producto> findTop4ByDestacadoTrueAndActivoTrue();
+	@Query("""
+		    SELECT p
+		    FROM Producto p
+		    JOIN FETCH p.categoria c
+		    JOIN FETCH p.marca m
+		    WHERE p.destacado = true
+		      AND p.activo = true
+		      AND c.activo = true
+		      AND m.activo = true
+		    ORDER BY p.id DESC
+		    """)
+	List<Producto> listarDestacados();
 	
 	List<Producto> findByCategoriaId(Long categoriaId);
 	

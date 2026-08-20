@@ -1,6 +1,8 @@
 package com.stylemax.stylemax_api.Controller;
 
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,5 +45,10 @@ public class ProductoController {
     @GetMapping("/{slug}")
     public ProductoDetalleDTO obtenerPorSlug(@PathVariable String slug) {
         return productoService.obtenerPorSlug(slug);
+    }
+    
+    @GetMapping("/destacados")
+    public List<ProductoCardDTO> listarDestacados() {
+        return productoService.listarDestacados();
     }
 }
