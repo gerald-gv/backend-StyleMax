@@ -9,7 +9,7 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
-RUN mvn clean package -DskipTests -Duser.timezone=America/Lima
+RUN mvn clean package -DskipTests
 
 
 # RUNTIME STAGE
@@ -21,4 +21,4 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=America/Lima", "-jar", "app.jar"]
