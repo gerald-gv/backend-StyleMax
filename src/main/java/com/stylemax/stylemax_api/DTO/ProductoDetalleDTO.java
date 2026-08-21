@@ -7,9 +7,11 @@ import com.stylemax.stylemax_api.Enums.Fit;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 // Vista completa de un producto, usada en la pagina de detalle (ruta dinamica GET /api/productos/{slug}).
 @Getter
+@Setter
 @Builder
 public class ProductoDetalleDTO {
 
@@ -25,6 +27,7 @@ public class ProductoDetalleDTO {
     private Boolean destacado;
     private MarcaDTO marca;
     private CategoriaDTO categoria;
+    private Boolean favorito;
 
     public static ProductoDetalleDTO fromEntity(Producto p) {
         return ProductoDetalleDTO.builder()
@@ -40,6 +43,7 @@ public class ProductoDetalleDTO {
                 .destacado(p.getDestacado())
                 .marca(MarcaDTO.fromEntity(p.getMarca()))
                 .categoria(CategoriaDTO.fromEntity(p.getCategoria()))
+                .favorito(false)
                 .build();
     }
 }

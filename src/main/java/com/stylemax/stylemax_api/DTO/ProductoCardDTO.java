@@ -6,9 +6,11 @@ import com.stylemax.stylemax_api.Entity.Producto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 // Vista resumida de un producto, pensada para grillas/cards del catalogo (home, listado por categoria, destacados, resultados de busqueda).
 @Getter
+@Setter
 @Builder
 public class ProductoCardDTO {
 
@@ -21,6 +23,7 @@ public class ProductoCardDTO {
     private Boolean destacado;
     private String marca;
     private String categoria;
+    private Boolean favorito;
 
     public static ProductoCardDTO fromEntity(Producto p) {
         return ProductoCardDTO.builder()
@@ -33,6 +36,7 @@ public class ProductoCardDTO {
                 .destacado(p.getDestacado())
                 .marca(p.getMarca().getNombre())
                 .categoria(p.getCategoria().getNombre())
+                .favorito(false)
                 .build();
     }
 }
