@@ -307,13 +307,9 @@ public class ProductoService {
 
         if (request.stock() <= 0) {
             producto.setActivo(false);
+        } else if (request.activo() != null) {
+            producto.setActivo(request.activo());
         }
-
-        producto.setActivo(
-                request.activo() != null
-                        ? request.activo()
-                        : false
-        );
 
         producto.setMarca(marca);
         producto.setCategoria(categoria);

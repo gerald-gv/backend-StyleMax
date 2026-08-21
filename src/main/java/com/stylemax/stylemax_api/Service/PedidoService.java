@@ -93,6 +93,9 @@ public class PedidoService {
         }
 
         producto.setStock(producto.getStock() - item.getCantidad());
+        if (producto.getStock() <= 0) {
+            producto.setActivo(false);
+        }
         productoRepository.save(producto);
 
         DetallePedido detalle = DetallePedido.builder()
