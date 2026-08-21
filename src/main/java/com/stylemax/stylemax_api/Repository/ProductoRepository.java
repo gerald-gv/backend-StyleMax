@@ -57,16 +57,22 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
 	
 	@Query("""
-			SELECT p FROM Producto  p 
-			WHERE p.activo = true
-			AND p.marca.activo = true
-			AND p.categoria.activo = true
-			AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
-			AND (:marcaId IS NULL OR p.marca.id = :marcaId)
-			AND (:fit IS NULL OR p.fit = :fit)
-			AND (:q IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%')))
-			ORDER BY p.nombre ASC
-			""")
+	        SELECT p
+	        FROM Producto p
+	        WHERE p.activo = true
+	          AND p.marca.activo = true
+	          AND p.categoria.activo = true
+	          AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
+	          AND (:marcaId IS NULL OR p.marca.id = :marcaId)
+	          AND (:fit IS NULL OR p.fit = :fit)
+	          AND (
+	              :q IS NULL
+	              OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%'))
+	              OR LOWER(p.marca.nombre) LIKE LOWER(CONCAT('%', :q, '%'))
+	              OR LOWER(p.categoria.nombre) LIKE LOWER(CONCAT('%', :q, '%'))
+	          )
+	        ORDER BY p.nombre ASC
+	        """)
 	Page<Producto> buscarCatalogo(@Param("categoriaId") Long categoriaId, @Param("marcaId") Long marcaId, @Param("fit") Fit  fit, @Param("q") String q, Pageable pageable);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)

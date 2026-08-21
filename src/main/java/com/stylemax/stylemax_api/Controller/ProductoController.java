@@ -32,13 +32,20 @@ public class ProductoController {
             @RequestParam(required = false) Long marcaId,
             @RequestParam(required = false) Fit fit,
             @RequestParam(required = false) String q,
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "18") int size
+    		) {
     	
     	if (page < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"La página no puede ser negativa");
         }
     	
-        return productoService.listarCatalogo(categoriaId, marcaId, fit, q, page);
+    	if (size <= 0 || size > 50) {
+            throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "El tamaño de página debe estar entre 1 y 50"
+            );
+        }
+    	
+        return productoService.listarCatalogo(categoriaId, marcaId, fit, q, page, size);
     }
 
     //ruta dinamica, pagina de detalle.

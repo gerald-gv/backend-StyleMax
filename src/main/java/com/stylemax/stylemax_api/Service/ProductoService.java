@@ -40,10 +40,10 @@ public class ProductoService {
     private final CategoriaRepository categoriaRepository;
 
     //Catalogo principal
-    public PaginaDTO<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, Fit fit, String q, int pagina) {
+    public PaginaDTO<ProductoCardDTO> listarCatalogo(Long categoriaId, Long marcaId, Fit fit, String q, int pagina, int tamanio) {
         String query = (q == null || q.isBlank()) ? null : q.trim();
         
-        Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA);
+        Pageable pageable = PageRequest.of(pagina, tamanio);
         
         Page<Producto> productos = productoRepository.buscarCatalogo(categoriaId, marcaId,fit, query, pageable);
         
