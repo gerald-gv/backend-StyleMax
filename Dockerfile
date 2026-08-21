@@ -9,7 +9,7 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Duser.timezone=America/Lima
 
 
 # RUNTIME STAGE
