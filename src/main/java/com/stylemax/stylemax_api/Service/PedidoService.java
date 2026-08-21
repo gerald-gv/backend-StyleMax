@@ -1,5 +1,10 @@
 package com.stylemax.stylemax_api.Service;
 
+import com.stylemax.stylemax_api.DTO.PaginaDTO;
+import com.stylemax.stylemax_api.DTO.PedidoClienteResumenDTO;
+import com.stylemax.stylemax_api.DTO.PedidoClienteResumenProjection;
+import com.stylemax.stylemax_api.DTO.PedidoDetalleClienteDTO;
+import com.stylemax.stylemax_api.DTO.PedidoProductoDTO;
 import com.stylemax.stylemax_api.Entity.Carrito;
 import com.stylemax.stylemax_api.Entity.CarritoItem;
 import com.stylemax.stylemax_api.Entity.DetallePedido;
@@ -12,10 +17,15 @@ import com.stylemax.stylemax_api.Repository.PedidoRepository;
 import com.stylemax.stylemax_api.Repository.ProductoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -108,6 +118,82 @@ public class PedidoService {
         }
         return pedido;
     }
+    
+    @Transactional
+    public PaginaDTO<PedidoClienteResumenDTO> obtenerPedidosCliente( Long usuarioId, int pagina, int tamanio, List<PedidoEstado> estados) {
+
+        Pageable pageable = PageRequest.of( pagina, tamanio);
+
+        Page<PedidoClienteResumenProjection> pedidos = pedidoRepository.buscarResumenCliente( usuarioId, estados, pageable);
+
+        List<PedidoClienteResumenDTO> contenido = pedidos
+                .getContent()
+                .stream()
+                .map(proyeccion -> new PedidoClienteResumenDTO(
+                        proyeccion.getId(),
+                        proyeccion.getFechaPedido(),
+                        proyeccion.getEstado(),
+                        proyeccion.getTotal(),
+                        proyeccion.getCantidadProductos(),
+                        proyeccion.getPrimerProducto(),
+                        proyeccion.getPrimeraImagen()
+                ))
+                .toList();
+
+        return PaginaDTO.<PedidoClienteResumenDTO>builder()
+
+                .contenido(contenido)
+                .pagina(pedidos.getNumber())
+                .tamanio(pedidos.getSize())
+                .totalElementos(pedidos.getTotalElements())
+                .totalPaginas(pedidos.getTotalPages())
+                .ultima(pedidos.isLast())
+                .build();
+    }
+    
+    @Transactional
+    public PedidoDetalleClienteDTO obtenerDetalleCliente( Long pedidoId, Long usuarioId) {
+
+        Pedido pedido = pedidoRepository
+                .buscarDetalleCliente(pedidoId, usuarioId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(  HttpStatus.NOT_FOUND, "Pedido no encontrado: " + pedidoId)
+                );
+
+        List<PedidoProductoDTO> productos = pedido.getDetalles()
+                .stream()
+                .map(detalle -> {
+
+                    BigDecimal subtotal = detalle.getPrecioUnitario()
+                            .multiply( BigDecimal.valueOf(detalle.getCantidad()));
+
+                    return new PedidoProductoDTO(
+                            detalle.getProducto().getId(),
+                            detalle.getProducto().getNombre(),
+                            detalle.getCantidad(),
+                            detalle.getPrecioUnitario(),
+                            subtotal,
+                            detalle.getProducto().getImagen()
+                    );
+                })
+                .toList();
+
+        return new PedidoDetalleClienteDTO(
+                pedido.getId(),
+                pedido.getFechaPedido(),
+                pedido.getEstado(),
+                pedido.getTotal(),
+                productos,
+                pedido.getDepartamento(),
+                pedido.getProvincia(),
+                pedido.getDistrito(),
+                pedido.getDireccionCompleta(),
+                pedido.getReferencia(),
+                "Mercado Pago"
+        );
+    }
+    
+    
     @Transactional
     public void guardarPreferencia(Long pedidoId, String preferenceId) {
         Pedido pedido = obtenerPorId(pedidoId);
